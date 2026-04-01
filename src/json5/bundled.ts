@@ -1,23 +1,16 @@
 import { JSONSchema7 } from "json-schema";
 import { json5, json5Language, json5ParseLinter } from "codemirror-json5";
-import { hoverTooltip, ViewPlugin } from "@codemirror/view";
+import { hoverTooltip } from "@codemirror/view";
 import { json5Completion } from "./completion";
 import { json5SchemaLinter } from "./validation";
 import { json5SchemaHover } from "./hover";
 
 import { linter } from "@codemirror/lint";
 import { handleRefresh } from "../features/validation";
-import {
-  stateExtensions,
-  getJSONSchema,
-  updateCompiledSchema,
-} from "../features/state";
-import {
-  schemaConfigFacet,
-  type SchemaConfig,
-} from "../features/schema-config";
-import { RefResolver, type FetchSchemaFn } from "../features/ref-resolver";
-import { compileSchema } from "json-schema-library";
+import { stateExtensions } from "../features/state";
+import { schemaConfigFacet } from "../features/schema-config";
+import { schemaResolverPlugin } from "../features/schema-resolver";
+import { type FetchSchemaFn } from "../features/ref-resolver";
 
 export interface Json5SchemaOptions {
   schema?: JSONSchema7;
@@ -34,40 +27,6 @@ function isJson5SchemaOptions(
     typeof arg.fetchSchema === "function"
   );
 }
-
-const json5SchemaResolverPlugin = ViewPlugin.define((view) => {
-  let lastRawSchema: JSONSchema7 | void = undefined;
-  const config = view.state.facet(schemaConfigFacet);
-  const fetchFn = config.fetchSchema;
-  if (!fetchFn) return { update() {} };
-
-  const resolver = new RefResolver(fetchFn);
-
-  function maybeResolve(view: import("@codemirror/view").EditorView) {
-    const raw = getJSONSchema(view.state);
-    if (raw === lastRawSchema) return;
-    lastRawSchema = raw;
-    if (!raw) {
-      updateCompiledSchema(view, undefined);
-      return;
-    }
-
-    updateCompiledSchema(view, compileSchema(raw));
-
-    resolver.compileAndResolve(raw).then((compiled) => {
-      if (getJSONSchema(view.state) === raw) {
-        updateCompiledSchema(view, compiled);
-      }
-    });
-  }
-
-  maybeResolve(view);
-  return {
-    update(vu: import("@codemirror/view").ViewUpdate) {
-      maybeResolve(vu.view);
-    },
-  };
-});
 
 /**
  * Full featured cm6 extension for json5, including `codemirror-json5`
@@ -100,7 +59,7 @@ export function json5Schema(schemaOrOpts?: JSONSchema7 | Json5SchemaOptions) {
   if (fetchSchema) {
     extensions.push(
       schemaConfigFacet.of({ fetchSchema }),
-      json5SchemaResolverPlugin,
+      schemaResolverPlugin,
     );
   }
 
