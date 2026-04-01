@@ -1,7 +1,10 @@
 {
-  "name": "codemirror-json-schema",
+  "name": "@invopop/codemirror-json-schema",
   "license": "MIT",
-  "version": "0.8.1",
+  "version": "0.9.0",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "description": "Codemirror 6 extensions that provide full JSONSchema support for `@codemirror/lang-json` and `codemirror-json5`",
   "contributors": [
     {
@@ -54,7 +57,7 @@
       "default": "./cjs/yaml/index.js"
     }
   },
-  "repository": "github:acao/codemirror-json-schema",
+  "repository": "github:invopop/codemirror-json-schema",
   "homepage": "https://codemirror-json-schema.netlify.app/",
   "dependencies": {
     "@sagold/json-pointer": "^5.1.1",
