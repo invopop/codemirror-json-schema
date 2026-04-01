@@ -107,11 +107,8 @@ export const getJsonPointers = (
           pointers.set(pointer, { keyFrom, keyTo });
           return true;
         }
-        // TODO: Make this generic enough to avoid mode-specific checks
-        const nextNode =
-          mode === MODES.JSON
-            ? type.node?.nextSibling?.node
-            : type.node?.nextSibling?.node?.nextSibling?.node;
+        // Skip past the colon/separator to get the value node
+        const nextNode = type.node?.nextSibling?.node?.nextSibling?.node;
         if (!nextNode) {
           pointers.set(pointer, { keyFrom, keyTo });
           return true;
