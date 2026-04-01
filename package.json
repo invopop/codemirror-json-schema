@@ -1,9 +1,9 @@
 {
   "name": "@invopop/codemirror-json-schema",
   "license": "MIT",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "access": "public"
   },
   "description": "Codemirror 6 extensions that provide full JSONSchema support for `@codemirror/lang-json` and `codemirror-json5`",
   "contributors": [
