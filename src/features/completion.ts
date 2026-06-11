@@ -22,7 +22,7 @@ import {
   stripSurroundingQuotes,
   surroundingDoubleQuotesToSingle,
 } from "../utils/node";
-import { getJSONSchema } from "./state";
+import { getJSONSchema, getCompiledSchema } from "./state";
 import type { JsonError, JsonSchema, SchemaNode } from "json-schema-library";
 import { compileSchema, isJsonError } from "json-schema-library";
 import {
@@ -891,7 +891,7 @@ export class JSONCompletion {
   ): JSONSchema7Definition[] {
     const { data: documentData } = this.parser(ctx.state);
 
-    const draft = compileSchema(rootSchema);
+    const draft = getCompiledSchema(ctx.state) ?? compileSchema(rootSchema);
     let pointer: string | undefined = jsonPointerForPosition(
       ctx.state,
       ctx.pos,
@@ -911,6 +911,7 @@ export class JSONCompletion {
         rootSchema,
         documentData,
         pointer,
+        draft,
       );
       if (effectiveSchemaOfPointer != null) {
         return [effectiveSchemaOfPointer];
@@ -926,6 +927,7 @@ export class JSONCompletion {
       rootSchema,
       documentData,
       parentPointer,
+      draft,
     );
     const deepestPropertyKey = pointer?.split("/").pop();
     const pointerPointsToKnownProperty =
@@ -995,34 +997,11 @@ export class JSONCompletion {
       return [];
     }
 
-    // Check the resolved schema for applicator keywords, falling back to the
-    // raw property definition from rootSchema when getNode() has reduced them away
-    // (e.g. $ref + oneOf sibling in Draft 2020-12).
-    let effectiveSchema: JsonSchema = subSchema;
-    if (
-      !Array.isArray(subSchema.allOf) &&
-      !Array.isArray(subSchema.oneOf) &&
-      !Array.isArray(subSchema.anyOf) &&
-      pointer
-    ) {
-      // Navigate the compiled node tree to find the raw (unresolved) schema,
-      // which preserves sibling keywords like oneOf alongside $ref.
-      const rawSchema = getRawSchemaForPointer(draft, pointer);
-      if (rawSchema) {
-        const expanded = expandSchemaProperty(
-          rawSchema as JSONSchema7,
-          rootSchema,
-        );
-        if (
-          typeof expanded === "object" &&
-          (Array.isArray(expanded.allOf) ||
-            Array.isArray(expanded.oneOf) ||
-            Array.isArray(expanded.anyOf))
-        ) {
-          effectiveSchema = { ...subSchema, ...expanded } as JsonSchema;
-        }
-      }
-    }
+    // `$ref` + sibling applicator keywords (e.g. oneOf alongside a $ref) are
+    // lifted into `allOf` by normalizeRefSiblings before compilation, so the
+    // siblings survive getNode() resolution and are handled by the branches
+    // below — no raw-schema fallback navigation is needed.
+    const effectiveSchema: JsonSchema = subSchema;
 
     if (Array.isArray(effectiveSchema.allOf)) {
       return [
@@ -1151,9 +1130,9 @@ function getEffectiveObjectWithPropertiesSchema(
   schema: JSONSchema7,
   data: unknown,
   pointer: string | undefined,
+  compiledNode?: SchemaNode,
 ): JSONSchema7 | undefined {
-  // TODO (unimportant): [performance] cache compileSchema in case it does some pre-processing? but does not seem to be significant
-  const draft = compileSchema(schema);
+  const draft = compiledNode ?? compileSchema(schema);
   const subSchemaResult =
     pointer != null
       ? draft.getNode(pointer, data ?? undefined)
@@ -1292,28 +1271,4 @@ function getReferenceSchema(schema: JSONSchema7, ref: string) {
 
 function extendJsonPointer(pointer: string | undefined, key: string) {
   return pointer === undefined ? `/${key}` : `${pointer}/${key}`;
-}
-
-/**
- * Navigate the compiled SchemaNode tree to find the raw (unresolved) schema
- * for a data pointer. This preserves sibling keywords (e.g. oneOf alongside $ref)
- * that getNode() would reduce away.
- */
-function getRawSchemaForPointer(
-  root: SchemaNode,
-  pointer: string,
-): JsonSchema | undefined {
-  const segments = pointer.split("/").filter(Boolean);
-  let current: SchemaNode | undefined = root;
-  for (const segment of segments) {
-    if (!current) return undefined;
-    // Navigate via compiled .properties for object schemas
-    const props = current.properties as Record<string, SchemaNode> | undefined;
-    if (props && props[segment]) {
-      current = props[segment];
-    } else {
-      return undefined;
-    }
-  }
-  return current?.schema;
 }
