@@ -1,5 +1,6 @@
 import type { JSONSchema7 } from "json-schema";
 import { compileSchema, type SchemaNode } from "json-schema-library";
+import { normalizeRefSiblings } from "../utils/normalize-schema";
 
 export type FetchSchemaFn = (url: string) => Promise<any | undefined>;
 
@@ -122,7 +123,7 @@ export class RefResolver {
     for (let i = 0; i < newUrls.length; i++) {
       const result = results[i];
       if (result.status === "fulfilled" && result.value != null) {
-        const fetched = result.value;
+        const fetched = normalizeRefSiblings(result.value);
         node.addRemoteSchema(newUrls[i], fetched);
         fetchedSchemas.push(fetched);
       }

@@ -8,6 +8,7 @@ import {
   testSchemaConditionalProperties,
   testSchemaConditionalPropertiesOnSameObject,
   testSchemaRefWithOneOf,
+  testSchemaArrayItemsRefWithOneOf,
   wrappedTestSchemaConditionalPropertiesOnSameObject,
 } from "./__fixtures__/schemas";
 
@@ -984,6 +985,34 @@ describe.each([
   },
 ])(
   "jsonCompletionFor-testSchemaRefWithOneOf",
+  ({ name, docs, mode, expectedResults, schema }) => {
+    it.each(docs)(`${name} (mode: ${mode})`, async (doc) => {
+      await expectCompletion(doc, expectedResults, { mode, schema });
+    });
+  },
+);
+
+describe.each([
+  {
+    name: "$ref + oneOf value completions inside array items",
+    mode: MODES.JSON,
+    docs: ['{ "$addons": ["|"] }'],
+    expectedResults: [
+      {
+        label: "es-verifactu-v1",
+        apply: '"es-verifactu-v1"',
+        info: "Spain VERI*FACTU invoicing.",
+      },
+      {
+        label: "mx-cfdi-v4",
+        apply: '"mx-cfdi-v4"',
+        info: "Mexican SAT CFDI invoicing.",
+      },
+    ],
+    schema: testSchemaArrayItemsRefWithOneOf,
+  },
+])(
+  "jsonCompletionFor-testSchemaArrayItemsRefWithOneOf",
   ({ name, docs, mode, expectedResults, schema }) => {
     it.each(docs)(`${name} (mode: ${mode})`, async (doc) => {
       await expectCompletion(doc, expectedResults, { mode, schema });
