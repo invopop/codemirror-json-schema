@@ -37,18 +37,18 @@ dependencies:
     version: 1.22.2
   yaml:
     specifier: ^2.3.4
-    version: 2.3.4
+    version: 2.8.3
 
 optionalDependencies:
   '@codemirror/autocomplete':
     specifier: ^6.16.2
-    version: 6.16.2(@codemirror/language@6.10.2)(@codemirror/state@6.4.1)(@codemirror/view@6.27.0)(@lezer/common@1.2.1)
+    version: 6.20.3
   '@codemirror/lang-json':
     specifier: ^6.0.1
-    version: 6.0.1
+    version: 6.0.2
   '@codemirror/lang-yaml':
     specifier: ^6.1.1
-    version: 6.1.1(@codemirror/view@6.27.0)
+    version: 6.1.3
   codemirror-json5:
     specifier: ^1.0.3
     version: 1.0.3
@@ -119,13 +119,13 @@ devDependencies:
     version: 5.5.2
   vite:
     specifier: ^6.4.2
-    version: 6.4.2(@types/node@20.4.2)(yaml@2.3.4)
+    version: 6.4.2(@types/node@20.4.2)(yaml@2.8.3)
   vite-tsconfig-paths:
     specifier: ^4.3.1
     version: 4.3.1(typescript@5.5.2)(vite@6.4.2)
   vitest:
     specifier: ^3.2.6
-    version: 3.2.6(@types/node@20.4.2)(happy-dom@20.8.9)(jsdom@24.1.1)(yaml@2.3.4)
+    version: 3.2.6(@types/node@20.4.2)(happy-dom@20.8.9)(jsdom@24.1.1)(yaml@2.8.3)
   vitest-dom:
     specifier: ^0.1.1
     version: 0.1.1(vitest@3.2.6)
@@ -398,13 +398,8 @@ packages:
       prettier: 2.8.8
     dev: true
 
-  /@codemirror/autocomplete@6.16.2(@codemirror/language@6.10.2)(@codemirror/state@6.4.1)(@codemirror/view@6.27.0)(@lezer/common@1.2.1):
-    resolution: {integrity: sha512-MjfDrHy0gHKlPWsvSsikhO1+BOh+eBHNgfH1OXs1+DAf30IonQldgMM3kxLDTG9ktE7kDLaA1j/l7KMPA4KNfw==}
-    peerDependencies:
-      '@codemirror/language': ^6.0.0
-      '@codemirror/state': ^6.0.0
-      '@codemirror/view': ^6.0.0
-      '@lezer/common': ^1.0.0
+  /@codemirror/autocomplete@6.20.3:
+    resolution: {integrity: sha512-tlosUqb+3BbxCxZdu4tKeRghPFC+QM7q4X5YhKV2eCmPG+1r2F3f4AaSz5sCrFqUtX4Jh20VFTKecl16MgiV9g==}
     dependencies:
       '@codemirror/language': 6.10.2
       '@codemirror/state': 6.4.1
@@ -422,8 +417,8 @@ packages:
       '@lezer/common': 1.2.1
     dev: true
 
-  /@codemirror/lang-json@6.0.1:
-    resolution: {integrity: sha512-+T1flHdgpqDDlJZ2Lkil/rLiRy684WMLc74xUnjJH48GQdfJo/pudlTRreZmKwzP8/tGdKf83wlbAdOCzlJOGQ==}
+  /@codemirror/lang-json@6.0.2:
+    resolution: {integrity: sha512-x2OtO+AvwEHrEwR0FyyPtfDUiloG3rnVTSZV1W8UteaLL8/MajQd8DpvUb2YVzC+/T18aSDv0H9mu+xw0EStoQ==}
     requiresBuild: true
     dependencies:
       '@codemirror/language': 6.10.2
@@ -431,18 +426,17 @@ packages:
     dev: false
     optional: true
 
-  /@codemirror/lang-yaml@6.1.1(@codemirror/view@6.27.0):
-    resolution: {integrity: sha512-HV2NzbK9bbVnjWxwObuZh5FuPCowx51mEfoFT9y3y+M37fA3+pbxx4I7uePuygFzDsAmCTwQSc/kXh/flab4uw==}
+  /@codemirror/lang-yaml@6.1.3:
+    resolution: {integrity: sha512-AZ8DJBuXGVHybpBQhmZtgew5//4hv3tdkXnr3vDmOUMJRuB6vn/uuwtmTOTlqEaQFg3hQSVeA90NmvIQyUV6FQ==}
     requiresBuild: true
     dependencies:
-      '@codemirror/autocomplete': 6.16.2(@codemirror/language@6.10.2)(@codemirror/state@6.4.1)(@codemirror/view@6.27.0)(@lezer/common@1.2.1)
+      '@codemirror/autocomplete': 6.20.3
       '@codemirror/language': 6.10.2
       '@codemirror/state': 6.4.1
       '@lezer/common': 1.2.1
       '@lezer/highlight': 1.2.3
+      '@lezer/lr': 1.4.10
       '@lezer/yaml': 1.0.4
-    transitivePeerDependencies:
-      - '@codemirror/view'
     dev: false
     optional: true
 
@@ -811,20 +805,27 @@ packages:
   /@lezer/common@1.2.1:
     resolution: {integrity: sha512-yemX0ZD2xS/73llMZIK6KplkjIjf2EvAHcinDi/TfJ9hS25G0388+ClHt6/3but0oOxinTcQHJLDXh6w1crzFQ==}
 
-  /@lezer/common@1.5.1:
-    resolution: {integrity: sha512-6YRVG9vBkaY7p1IVxL4s44n5nUnaNnGM2/AckNgYOnxTG2kWh1vR8BMxPseWPjRNpb5VtXnMpeYAEAADoRV1Iw==}
+  /@lezer/common@1.5.2:
+    resolution: {integrity: sha512-sxQE460fPZyU3sdc8lafxiPwJHBzZRy/udNFynGQky1SePYBdhkBl1kOagA9uT3pxR8K09bOrmTUqA9wb/PjSQ==}
 
   /@lezer/highlight@1.2.3:
     resolution: {integrity: sha512-qXdH7UqTvGfdVBINrgKhDsVTJTxactNNxLk7+UMwZhU13lMHaOBlJe9Vqp907ya56Y3+ed2tlqzys7jDkTmW0g==}
     dependencies:
-      '@lezer/common': 1.5.1
+      '@lezer/common': 1.5.2
 
   /@lezer/json@1.0.3:
     resolution: {integrity: sha512-BP9KzdF9Y35PDpv04r0VeSTKDeox5vVr3efE7eBbx3r4s3oNLfunchejZhjArmeieBH+nVOpgIiBJpEAv8ilqQ==}
     dependencies:
       '@lezer/common': 1.2.1
       '@lezer/highlight': 1.2.3
-      '@lezer/lr': 1.4.8
+      '@lezer/lr': 1.4.10
+    dev: false
+    optional: true
+
+  /@lezer/lr@1.4.10:
+    resolution: {integrity: sha512-rnCpTIBafOx4mRp43xOxDJbFipJm/c0cia/V5TiGlhmMa+wsSdoGmUN3w5Bqrks/09Q/D4tNAmWaT8p6NRi77A==}
+    dependencies:
+      '@lezer/common': 1.2.1
     dev: false
     optional: true
 
@@ -838,7 +839,7 @@ packages:
     dependencies:
       '@lezer/common': 1.2.1
       '@lezer/highlight': 1.2.3
-      '@lezer/lr': 1.4.8
+      '@lezer/lr': 1.4.10
     dev: false
     optional: true
 
@@ -1265,7 +1266,7 @@ packages:
       std-env: 3.10.0
       test-exclude: 7.0.2
       tinyrainbow: 2.0.0
-      vitest: 3.2.6(@types/node@20.4.2)(happy-dom@20.8.9)(jsdom@24.1.1)(yaml@2.3.4)
+      vitest: 3.2.6(@types/node@20.4.2)(happy-dom@20.8.9)(jsdom@24.1.1)(yaml@2.8.3)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -1294,7 +1295,7 @@ packages:
       '@vitest/spy': 3.2.6
       estree-walker: 3.0.3
       magic-string: 0.30.21
-      vite: 6.4.2(@types/node@20.4.2)(yaml@2.3.4)
+      vite: 6.4.2(@types/node@20.4.2)(yaml@2.8.3)
     dev: true
 
   /@vitest/pretty-format@3.2.6:
@@ -4343,7 +4344,7 @@ packages:
       vfile-message: 4.0.3
     dev: false
 
-  /vite-node@3.2.4(@types/node@20.4.2)(yaml@2.3.4):
+  /vite-node@3.2.4(@types/node@20.4.2)(yaml@2.8.3):
     resolution: {integrity: sha512-EbKSKh+bh1E1IFxeO0pg1n4dvoOTt0UDiXMd/qn++r98+jPO1xtJilvXldeuQ8giIB5IkpjCgMleHMNEsGH6pg==}
     engines: {node: ^18.0.0 || ^20.0.0 || >=22.0.0}
     hasBin: true
@@ -4352,7 +4353,7 @@ packages:
       debug: 4.4.3
       es-module-lexer: 1.7.0
       pathe: 2.0.3
-      vite: 6.4.2(@types/node@20.4.2)(yaml@2.3.4)
+      vite: 6.4.2(@types/node@20.4.2)(yaml@2.8.3)
     transitivePeerDependencies:
       - '@types/node'
       - jiti
@@ -4379,13 +4380,13 @@ packages:
       debug: 4.4.3
       globrex: 0.1.2
       tsconfck: 3.1.6(typescript@5.5.2)
-      vite: 6.4.2(@types/node@20.4.2)(yaml@2.3.4)
+      vite: 6.4.2(@types/node@20.4.2)(yaml@2.8.3)
     transitivePeerDependencies:
       - supports-color
       - typescript
     dev: true
 
-  /vite@6.4.2(@types/node@20.4.2)(yaml@2.3.4):
+  /vite@6.4.2(@types/node@20.4.2)(yaml@2.8.3):
     resolution: {integrity: sha512-2N/55r4JDJ4gdrCvGgINMy+HH3iRpNIz8K6SFwVsA+JbQScLiC+clmAxBgwiSPgcG9U15QmvqCGWzMbqda5zGQ==}
     engines: {node: ^18.0.0 || ^20.0.0 || >=22.0.0}
     hasBin: true
@@ -4432,7 +4433,7 @@ packages:
       postcss: 8.5.8
       rollup: 4.60.1
       tinyglobby: 0.2.17
-      yaml: 2.3.4
+      yaml: 2.8.3
     optionalDependencies:
       fsevents: 2.3.3
     dev: true
@@ -4448,10 +4449,10 @@ packages:
       dom-accessibility-api: 0.6.3
       lodash-es: 4.18.1
       redent: 4.0.0
-      vitest: 3.2.6(@types/node@20.4.2)(happy-dom@20.8.9)(jsdom@24.1.1)(yaml@2.3.4)
+      vitest: 3.2.6(@types/node@20.4.2)(happy-dom@20.8.9)(jsdom@24.1.1)(yaml@2.8.3)
     dev: true
 
-  /vitest@3.2.6(@types/node@20.4.2)(happy-dom@20.8.9)(jsdom@24.1.1)(yaml@2.3.4):
+  /vitest@3.2.6(@types/node@20.4.2)(happy-dom@20.8.9)(jsdom@24.1.1)(yaml@2.8.3):
     resolution: {integrity: sha512-xejya+bT/j/+R/AGa1XOfRxLmNUlLtlwjRsFUILF+xHfzElmGcmFydy2gqqIrd62ptIEfwVMofd19uNWD9L7Nw==}
     engines: {node: ^18.0.0 || ^20.0.0 || >=22.0.0}
     hasBin: true
@@ -4502,8 +4503,8 @@ packages:
       tinyglobby: 0.2.17
       tinypool: 1.1.1
       tinyrainbow: 2.0.0
-      vite: 6.4.2(@types/node@20.4.2)(yaml@2.3.4)
-      vite-node: 3.2.4(@types/node@20.4.2)(yaml@2.3.4)
+      vite: 6.4.2(@types/node@20.4.2)(yaml@2.8.3)
+      vite-node: 3.2.4(@types/node@20.4.2)(yaml@2.8.3)
       why-is-node-running: 2.3.0
     transitivePeerDependencies:
       - jiti
@@ -4741,9 +4742,10 @@ packages:
     resolution: {integrity: sha512-ncTzHV7NvsQZkYe1DW7cbDLm0YpzHmZF5r/iyP3ZnQtMiJ+pjzisCiMNI+Sj+xQF5pXhSHxSB3uDbsBTzY/c2A==}
     dev: true
 
-  /yaml@2.3.4:
-    resolution: {integrity: sha512-8aAvwVUSHpfEqTQ4w/KMlf3HcRdt50E5ODIQJBw1fQ5RL34xabzxtUlzTXVqc4rkZsPbvrXKWnABCD7kWSmocA==}
-    engines: {node: '>= 14'}
+  /yaml@2.8.3:
+    resolution: {integrity: sha512-AvbaCLOO2Otw/lW5bmh9d/WEdcDFdQp2Z2ZUH3pX9U2ihyUY0nvLv7J6TrWowklRGPYbB/IuIMfYgxaCPg5Bpg==}
+    engines: {node: '>= 14.6'}
+    hasBin: true
 
   /yargs-parser@18.1.3:
     resolution: {integrity: sha512-o50j0JeToy/4K6OZcaQmW6lyXXKhq7csREXcDwk2omFPJEwUNOVtJKvmDr9EI1fAJZUyZcRF7kxGBWmRXudrCQ==}
