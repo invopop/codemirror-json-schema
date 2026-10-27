@@ -72,6 +72,22 @@ describe("compileSchema", () => {
     expect(node.validate({ v: 1 }).valid).toBe(false);
   });
 
+  it("counts properties evaluated by then/else for unevaluatedProperties", () => {
+    const node = compileSchema({
+      $schema: "https://json-schema.org/draft/2020-12/schema",
+      type: "object",
+      properties: { kind: { type: "string" } },
+      if: { properties: { kind: { const: "a" } } },
+      then: { properties: { a: { type: "number" } } },
+      else: { properties: { b: { type: "number" } } },
+      unevaluatedProperties: false,
+    });
+    expect(node.validate({ kind: "a", a: 1 }).valid).toBe(true);
+    expect(node.validate({ kind: "x", b: 1 }).valid).toBe(true);
+    expect(node.validate({ kind: "a", b: 1 }).valid).toBe(false);
+    expect(node.validate({ kind: "x", a: 1 }).valid).toBe(false);
+  });
+
   it("validates large documents in linear time", () => {
     const node = compileSchema(schema);
     const doc = (n: number) => ({
