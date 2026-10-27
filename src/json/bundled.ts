@@ -5,7 +5,7 @@ import { jsonCompletion } from "../features/completion";
 import { handleRefresh, jsonSchemaLinter } from "../features/validation";
 import { jsonSchemaHover } from "../features/hover";
 import { stateExtensions } from "../features/state";
-import { schemaConfigFacet } from "../features/schema-config";
+import { isSchemaOptions, schemaConfigFacet } from "../features/schema-config";
 import { schemaResolverPlugin } from "../features/schema-resolver";
 import { type FetchSchemaFn } from "../features/ref-resolver";
 
@@ -16,17 +16,6 @@ export interface JsonSchemaOptions {
   fetchSchema?: FetchSchemaFn;
 }
 
-function isJsonSchemaOptions(
-  arg: JSONSchema7 | JsonSchemaOptions | undefined,
-): arg is JsonSchemaOptions {
-  return (
-    arg != null &&
-    typeof arg === "object" &&
-    "fetchSchema" in arg &&
-    typeof arg.fetchSchema === "function"
-  );
-}
-
 /**
  * Full featured cm6 extension for json, including `@codemirror/lang-json`
  * @group Bundled Codemirror Extensions
@@ -35,7 +24,7 @@ export function jsonSchema(schemaOrOpts?: JSONSchema7 | JsonSchemaOptions) {
   let schema: JSONSchema7 | undefined;
   let fetchSchema: FetchSchemaFn | undefined;
 
-  if (isJsonSchemaOptions(schemaOrOpts)) {
+  if (isSchemaOptions(schemaOrOpts)) {
     schema = schemaOrOpts.schema;
     fetchSchema = schemaOrOpts.fetchSchema;
   } else {

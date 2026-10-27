@@ -115,7 +115,8 @@ function createDynamicEditor(parent: Element): EditorView {
       activeSchemaURL = url;
       console.log("Loading schema:", url);
       const schema = await fetchSchemaByURL(url);
-      if (schema) updateSchema(view, schema);
+      // The editor may have been replaced while the schema loaded.
+      if (schema && view === editor1) updateSchema(view, schema);
     } catch (e) {
       console.warn("Schema loading failed:", e);
     }

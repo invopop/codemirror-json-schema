@@ -304,3 +304,83 @@ describe("RefResolver", () => {
     expect(fetchSchema).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("collectExternalRefs keywords", () => {
+  it("should walk every schema-bearing keyword", () => {
+    const ref = (name: string) => ({ $ref: `https://example.com/${name}` });
+    const schema = {
+      not: ref("not"),
+      propertyNames: ref("propertyNames"),
+      dependentSchemas: { a: ref("dependentSchemas") },
+      dependencies: { b: ref("dependencies"), c: ["a"] },
+      contentSchema: ref("contentSchema"),
+      additionalItems: ref("additionalItems"),
+      unevaluatedItems: ref("unevaluatedItems"),
+      unevaluatedProperties: ref("unevaluatedProperties"),
+      properties: { default: ref("property-named-default") },
+    };
+    expect([...collectExternalRefs(schema)].sort()).toEqual(
+      [
+        "additionalItems",
+        "contentSchema",
+        "dependencies",
+        "dependentSchemas",
+        "not",
+        "property-named-default",
+        "propertyNames",
+        "unevaluatedItems",
+        "unevaluatedProperties",
+      ].map((name) => `https://example.com/${name}`),
+    );
+  });
+
+  it("should not treat data as schemas", () => {
+    const schema = {
+      const: { $ref: "https://example.com/const" },
+      enum: [{ $ref: "https://example.com/enum" }],
+      default: { $ref: "https://example.com/default" },
+      examples: [{ $ref: "https://example.com/examples" }],
+    };
+    expect(collectExternalRefs(schema).size).toBe(0);
+  });
+});
+
+describe("RefResolver validation", () => {
+  it("should enforce constraints from fetched schemas", async () => {
+    const fetchSchema = vi.fn().mockResolvedValue({
+      $defs: { code: { enum: ["a", "b"] } },
+      type: "object",
+      required: ["street"],
+      properties: { street: { type: "string" } },
+    });
+    const resolver = new RefResolver(fetchSchema);
+    const node = await resolver.compileAndResolve({
+      type: "object",
+      properties: {
+        address: { $ref: "https://example.com/address" },
+        code: { $ref: "https://example.com/address#/$defs/code" },
+      },
+    });
+    expect(
+      node.validate({ address: { street: "Main" }, code: "a" }).valid,
+    ).toBe(true);
+    expect(node.validate({ address: {} }).valid).toBe(false);
+    expect(node.validate({ address: { street: 1 } }).valid).toBe(false);
+    expect(node.validate({ code: "c" }).valid).toBe(false);
+  });
+
+  it("should normalize $ref sibling keywords in the root schema", async () => {
+    const resolver = new RefResolver(vi.fn());
+    const node = await resolver.compileAndResolve({
+      $defs: { key: { type: "string" } },
+      type: "object",
+      properties: { key: { $ref: "#/$defs/key", enum: ["a"] } },
+    });
+    // Like schemas set through the editor state, so lookups such as
+    // completion keep the enum next to the $ref.
+    expect((node.schema as any).properties.key).toEqual({
+      allOf: [{ $ref: "#/$defs/key" }, { enum: ["a"] }],
+    });
+    expect(node.validate({ key: "b" }).valid).toBe(false);
+  });
+});

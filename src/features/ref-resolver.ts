@@ -1,6 +1,7 @@
 import type { JSONSchema7 } from "json-schema";
 import { compileSchema, type SchemaNode } from "json-schema-library";
 import { normalizeRefSiblings } from "../utils/normalize-schema";
+import { mapSubschemas } from "../utils/schema-walk";
 
 export type FetchSchemaFn = (url: string) => Promise<any | undefined>;
 
@@ -14,12 +15,7 @@ export function collectExternalRefs(
   collected?: Set<string>,
 ): Set<string> {
   const refs = collected ?? new Set<string>();
-  if (!schema || typeof schema !== "object") return refs;
-
-  if (Array.isArray(schema)) {
-    for (const item of schema) {
-      collectExternalRefs(item, refs);
-    }
+  if (!schema || typeof schema !== "object" || Array.isArray(schema)) {
     return refs;
   }
 
@@ -34,45 +30,7 @@ export function collectExternalRefs(
     }
   }
 
-  // Walk all schema keywords that can contain nested schemas
-  const keywords = [
-    "properties",
-    "additionalProperties",
-    "items",
-    "allOf",
-    "anyOf",
-    "oneOf",
-    "if",
-    "then",
-    "else",
-    "$defs",
-    "definitions",
-    "patternProperties",
-    "prefixItems",
-    "contains",
-  ];
-
-  for (const keyword of keywords) {
-    const value = schema[keyword];
-    if (!value || typeof value !== "object") continue;
-
-    if (Array.isArray(value)) {
-      for (const item of value) {
-        collectExternalRefs(item, refs);
-      }
-    } else if (
-      keyword === "properties" ||
-      keyword === "$defs" ||
-      keyword === "definitions" ||
-      keyword === "patternProperties"
-    ) {
-      for (const key of Object.keys(value)) {
-        collectExternalRefs(value[key], refs);
-      }
-    } else {
-      collectExternalRefs(value, refs);
-    }
-  }
+  mapSubschemas(schema, (subschema) => collectExternalRefs(subschema, refs));
 
   return refs;
 }
@@ -86,7 +44,10 @@ export class RefResolver {
     this.fetchSchema = fetchSchema;
   }
 
-  async compileAndResolve(schema: JSONSchema7): Promise<SchemaNode> {
+  async compileAndResolve(raw: JSONSchema7): Promise<SchemaNode> {
+    // Normalizing is idempotent, so schemas from the editor state, which
+    // are already normalized, are unchanged.
+    const schema = normalizeRefSiblings(raw);
     const node = compileSchema(schema);
 
     const visited = new Set<string>();

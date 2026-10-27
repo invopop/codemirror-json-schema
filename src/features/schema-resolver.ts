@@ -15,6 +15,9 @@ import { RefResolver } from "./ref-resolver";
  */
 export const schemaResolverPlugin = ViewPlugin.define((view) => {
   let lastRawSchema: JSONSchema7 | void = undefined;
+  // The raw schema whose fully resolved node has been dispatched.
+  let resolvedSchema: JSONSchema7 | void = undefined;
+  let destroyed = false;
   const config = view.state.facet(schemaConfigFacet);
   const fetchFn = config.fetchSchema;
   if (!fetchFn) return { update() {} };
@@ -26,8 +29,9 @@ export const schemaResolverPlugin = ViewPlugin.define((view) => {
     raw: JSONSchema7,
     node: import("json-schema-library").SchemaNode | undefined,
   ) {
-    // Only update if the raw schema hasn't changed since we started
-    if (getJSONSchema(view.state) === raw) {
+    // Only update a live view whose raw schema hasn't changed since we
+    // started
+    if (!destroyed && getJSONSchema(view.state) === raw) {
       updateCompiledSchema(view, node);
     }
   }
@@ -42,12 +46,17 @@ export const schemaResolverPlugin = ViewPlugin.define((view) => {
       return;
     }
 
-    // Defer immediate compile so features work right away without crashing
+    // Defer immediate compile so features work right away without crashing.
+    // Resolution can finish first when every remote schema is cached, so
+    // don't replace its node with this one.
     const compiled = compileSchema(raw);
-    setTimeout(() => dispatchCompiled(view, raw, compiled), 0);
+    setTimeout(() => {
+      if (resolvedSchema !== raw) dispatchCompiled(view, raw, compiled);
+    }, 0);
 
     // Async: resolve all external refs, then update with full compiled node
     resolver.compileAndResolve(raw).then((fullCompiled) => {
+      resolvedSchema = raw;
       dispatchCompiled(view, raw, fullCompiled);
     });
   }
@@ -56,6 +65,9 @@ export const schemaResolverPlugin = ViewPlugin.define((view) => {
   return {
     update(vu: ViewUpdate) {
       maybeResolve(vu.view);
+    },
+    destroy() {
+      destroyed = true;
     },
   };
 });

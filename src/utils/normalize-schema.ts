@@ -1,3 +1,5 @@
+import { mapSubschemas } from "./schema-walk";
+
 /**
  * JSON Schema 2020-12 treats `$ref` as an applicator that combines with any
  * sibling keywords (the implicit "and" of all assertions on the same object).
@@ -54,18 +56,14 @@ const ANNOTATION_KEYWORDS = new Set([
  * `allOf` member (no constraining siblings) and leaves it untouched.
  */
 export function normalizeRefSiblings<T>(schema: T): T {
-  if (Array.isArray(schema)) {
-    return schema.map((entry) => normalizeRefSiblings(entry)) as unknown as T;
-  }
-  if (schema === null || typeof schema !== "object") {
+  if (schema === null || typeof schema !== "object" || Array.isArray(schema)) {
     return schema;
   }
 
-  const input = schema as Record<string, unknown>;
-  const out: Record<string, unknown> = {};
-  for (const [key, value] of Object.entries(input)) {
-    out[key] = normalizeRefSiblings(value);
-  }
+  const out = mapSubschemas(
+    schema as Record<string, unknown>,
+    normalizeRefSiblings,
+  );
 
   if (typeof out.$ref === "string") {
     const constraintKeys = Object.keys(out).filter(

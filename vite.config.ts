@@ -7,9 +7,6 @@ export default defineConfig({
       ignoreConfigErrors: true,
     }),
   ],
-  server: {
-    cors: true,
-  },
   build: {
     // esbuild 0.28+ no longer supports transforming certain destructuring
     // patterns when targeting legacy environments. Use esnext to skip the
