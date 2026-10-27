@@ -1,5 +1,6 @@
 import type { JSONSchema7 } from "json-schema";
-import { compileSchema, type SchemaNode } from "json-schema-library";
+import type { SchemaNode } from "json-schema-library";
+import { compileSchema } from "../utils/compile-schema";
 import { normalizeRefSiblings } from "../utils/normalize-schema";
 import { mapSubschemas } from "../utils/schema-walk";
 
