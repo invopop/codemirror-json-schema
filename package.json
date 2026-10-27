@@ -66,9 +66,9 @@
     "json-schema": "^0.4.0",
     "json-schema-library": "^10.5.4",
     "loglevel": "^1.9.1",
-    "markdown-it": "^14.1.0",
+    "markdown-it": "^14.3.3",
     "shiki": "^1.22.2",
-    "yaml": "^2.3.4"
+    "yaml": "^2.9.1"
   },
   "optionalDependencies": {
     "@codemirror/autocomplete": "^6.16.2",
@@ -109,9 +109,9 @@
     "typedoc-plugin-markdown": "^3.15.3",
     "typescript": "^5.5.2",
     "vite": "^6.4.2",
+    "vite-tsconfig-paths": "^4.3.1",
     "vitest": "^3.2.6",
-    "vitest-dom": "^0.1.1",
-    "vite-tsconfig-paths": "^4.3.1"
+    "vitest-dom": "^0.1.1"
   },
   "pnpm": {
     "overrides": {

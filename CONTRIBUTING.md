@@ -45,3 +45,18 @@ pnpm test
    - There you can compose the markdown entry describing your changes that will be published in CHANGELOG.md
 2. Push your changes to your feature branch
 3. Open a pull request from your fork to the original repository in the Github UI or [CLI](https://cli.github.com/manual/gh_pr_create)
+
+## Releasing (Invopop fork)
+
+This fork is published to npm as `@invopop/codemirror-json-schema` by the [Release workflow](.github/workflows/release.yml). Whenever `main` has a `package.json` version that isn't on npm yet, the workflow tests, builds and publishes it with provenance, then creates a `v<version>` GitHub release with notes generated from the merged pull requests.
+
+To release:
+
+1. Bump `version` in `package.json` in a pull request, following [semver](https://semver.org): a patch for fixes, a minor for new features while we're on 0.x.
+2. Merge it. The release follows within a few minutes.
+
+Merges that don't change the version publish nothing. To retry a failed release, run the workflow manually from the Actions tab.
+
+npm authenticates the workflow with [trusted publishing](https://docs.npmjs.com/trusted-publishers), so there is no npm token to rotate. The package's trusted publisher on npmjs.com must name the `invopop/codemirror-json-schema` repository and the `release.yml` workflow.
+
+Changesets are still useful for pull requests to the [upstream repository](https://github.com/jsonnext/codemirror-json-schema), which releases with them; this fork doesn't need them.
