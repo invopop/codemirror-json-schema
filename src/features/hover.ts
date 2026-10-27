@@ -1,10 +1,10 @@
 import { type EditorView, Tooltip } from "@codemirror/view";
 import {
   type SchemaNode,
-  compileSchema,
   type JsonSchema,
   isJsonError,
 } from "json-schema-library";
+import { compileSchema } from "../utils/compile-schema";
 
 import { jsonPointerForPosition } from "../utils/json-pointers";
 import { joinWithOr } from "../utils/formatting";
