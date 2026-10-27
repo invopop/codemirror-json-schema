@@ -38,4 +38,34 @@ describe("normalizeRefSiblings", () => {
       },
     });
   });
+
+  it("should leave draft-04 to draft-07 schemas unchanged", () => {
+    for (const draft of ["draft-04", "draft-06", "draft-07"]) {
+      const schema = {
+        $schema: `http://json-schema.org/${draft}/schema#`,
+        properties: { key: { $ref: "#/$defs/key", type: "string" } },
+      };
+      expect(normalizeRefSiblings(schema)).toEqual(schema);
+    }
+  });
+
+  it("should follow nested $schema declarations", () => {
+    const legacy = {
+      $schema: "http://json-schema.org/draft-07/schema#",
+      properties: { key: { $ref: "#/definitions/key", type: "string" } },
+    };
+    expect(
+      normalizeRefSiblings({
+        $schema: "https://json-schema.org/draft/2020-12/schema",
+        $defs: { legacy },
+        properties: { key: { $ref: "#/$defs/key", type: "string" } },
+      }),
+    ).toEqual({
+      $schema: "https://json-schema.org/draft/2020-12/schema",
+      $defs: { legacy },
+      properties: {
+        key: { allOf: [{ $ref: "#/$defs/key" }, { type: "string" }] },
+      },
+    });
+  });
 });
