@@ -8,24 +8,13 @@ import { json5SchemaHover } from "./hover";
 import { linter } from "@codemirror/lint";
 import { handleRefresh } from "../features/validation";
 import { stateExtensions } from "../features/state";
-import { schemaConfigFacet } from "../features/schema-config";
+import { isSchemaOptions, schemaConfigFacet } from "../features/schema-config";
 import { schemaResolverPlugin } from "../features/schema-resolver";
 import { type FetchSchemaFn } from "../features/ref-resolver";
 
 export interface Json5SchemaOptions {
   schema?: JSONSchema7;
   fetchSchema?: FetchSchemaFn;
-}
-
-function isJson5SchemaOptions(
-  arg: JSONSchema7 | Json5SchemaOptions | undefined,
-): arg is Json5SchemaOptions {
-  return (
-    arg != null &&
-    typeof arg === "object" &&
-    "fetchSchema" in arg &&
-    typeof arg.fetchSchema === "function"
-  );
 }
 
 /**
@@ -36,7 +25,7 @@ export function json5Schema(schemaOrOpts?: JSONSchema7 | Json5SchemaOptions) {
   let schema: JSONSchema7 | undefined;
   let fetchSchema: FetchSchemaFn | undefined;
 
-  if (isJson5SchemaOptions(schemaOrOpts)) {
+  if (isSchemaOptions(schemaOrOpts)) {
     schema = schemaOrOpts.schema;
     fetchSchema = schemaOrOpts.fetchSchema;
   } else {
