@@ -47,25 +47,37 @@ const ANNOTATION_KEYWORDS = new Set([
   "$vocabulary",
 ]);
 
+// Drafts in which `$ref` replaces its siblings, matched like
+// json-schema-library matches `$schema`. Schemas without `$schema` use its
+// latest draft, 2020-12.
+const LEGACY_DRAFT = /draft-0[467]/;
+
 /**
  * Recursively rewrites every `$ref` that has constraining sibling keywords into
  * an `allOf` of the bare `$ref` and those siblings, so draft 2020-12 `$ref`
  * sibling semantics are honoured regardless of the resolver's default draft.
  *
+ * Schemas that declare draft-04, -06 or -07 in `$schema` are left as they
+ * are, since those drafts ignore `$ref` siblings. A nested `$schema` applies
+ * to its subschemas.
+ *
  * The transform is idempotent: a second pass finds the `$ref` alone inside an
  * `allOf` member (no constraining siblings) and leaves it untouched.
  */
-export function normalizeRefSiblings<T>(schema: T): T {
+export function normalizeRefSiblings<T>(schema: T, legacy = false): T {
   if (schema === null || typeof schema !== "object" || Array.isArray(schema)) {
     return schema;
   }
 
-  const out = mapSubschemas(
-    schema as Record<string, unknown>,
-    normalizeRefSiblings,
+  const input = schema as Record<string, unknown>;
+  if (typeof input.$schema === "string") {
+    legacy = LEGACY_DRAFT.test(input.$schema);
+  }
+  const out = mapSubschemas(input, (subschema) =>
+    normalizeRefSiblings(subschema, legacy),
   );
 
-  if (typeof out.$ref === "string") {
+  if (!legacy && typeof out.$ref === "string") {
     const constraintKeys = Object.keys(out).filter(
       (key) => key !== "$ref" && !ANNOTATION_KEYWORDS.has(key),
     );
