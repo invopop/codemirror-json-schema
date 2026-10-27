@@ -24,7 +24,8 @@ import {
 } from "../utils/node";
 import { getJSONSchema, getCompiledSchema } from "./state";
 import type { JsonError, JsonSchema, SchemaNode } from "json-schema-library";
-import { compileSchema, isJsonError } from "json-schema-library";
+import { isJsonError } from "json-schema-library";
+import { compileSchema } from "../utils/compile-schema";
 import {
   jsonPointerForPosition,
   resolveTokenName,
