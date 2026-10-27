@@ -253,6 +253,40 @@ export const testSchemaArrayOfObjects = {
   },
 } as JSONSchema7;
 
+export const testSchemaStringValidation = {
+  type: "object",
+  properties: {
+    code: {
+      type: "string",
+      minLength: 1,
+      maxLength: 10,
+      pattern: "^[A-Z]+$",
+    },
+    name: {
+      type: "string",
+      minLength: 2,
+    },
+  },
+  required: ["code"],
+  additionalProperties: false,
+} as JSONSchema7;
+
+export const testSchemaWithExternalRef = {
+  type: "object",
+  properties: {
+    code: { $ref: "https://example.com/schemas/code" },
+  },
+  $defs: {
+    Code: {
+      $id: "https://example.com/schemas/code",
+      type: "string",
+      minLength: 1,
+      maxLength: 10,
+      pattern: "^[A-Z]+$",
+    },
+  },
+} as JSONSchema7;
+
 export const testSchemaRefWithOneOf = {
   type: "object",
   properties: {

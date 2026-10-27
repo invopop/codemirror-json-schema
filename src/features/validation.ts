@@ -3,7 +3,12 @@ import { type Diagnostic } from "@codemirror/lint";
 import { type SchemaNode, type JsonError } from "json-schema-library";
 import { compileSchema } from "../utils/compile-schema";
 
-import { getJSONSchema, schemaStateField } from "./state";
+import {
+  getJSONSchema,
+  schemaStateField,
+  getCompiledSchema,
+  compiledSchemaStateField,
+} from "./state";
 import { joinWithOr } from "../utils/formatting";
 import { JSONMode, JSONPointerData, RequiredPick } from "../types";
 import { el } from "../utils/dom";
@@ -36,7 +41,10 @@ type JSONValidationSettings = RequiredPick<JSONValidationOptions, "jsonParser">;
 
 export const handleRefresh = (vu: ViewUpdate) => {
   return (
-    vu.startState.field(schemaStateField) !== vu.state.field(schemaStateField)
+    vu.startState.field(schemaStateField) !==
+      vu.state.field(schemaStateField) ||
+    vu.startState.field(compiledSchemaStateField, false) !==
+      vu.state.field(compiledSchemaStateField, false)
   );
 };
 
@@ -115,7 +123,7 @@ export class JSONValidation {
     if (!schema) {
       return [];
     }
-    this.schema = compileSchema(schema);
+    this.schema = getCompiledSchema(view.state) ?? compileSchema(schema);
 
     if (!this.schema) return [];
     const text = view.state.doc.toString();

@@ -22,7 +22,7 @@ import {
   stripSurroundingQuotes,
   surroundingDoubleQuotesToSingle,
 } from "../utils/node";
-import { getJSONSchema } from "./state";
+import { getJSONSchema, getCompiledSchema } from "./state";
 import type { JsonError, JsonSchema, SchemaNode } from "json-schema-library";
 import { isJsonError } from "json-schema-library";
 import { compileSchema } from "../utils/compile-schema";
@@ -892,7 +892,7 @@ export class JSONCompletion {
   ): JSONSchema7Definition[] {
     const { data: documentData } = this.parser(ctx.state);
 
-    const draft = compileSchema(rootSchema);
+    const draft = getCompiledSchema(ctx.state) ?? compileSchema(rootSchema);
     let pointer: string | undefined = jsonPointerForPosition(
       ctx.state,
       ctx.pos,
@@ -912,6 +912,7 @@ export class JSONCompletion {
         rootSchema,
         documentData,
         pointer,
+        draft,
       );
       if (effectiveSchemaOfPointer != null) {
         return [effectiveSchemaOfPointer];
@@ -927,6 +928,7 @@ export class JSONCompletion {
       rootSchema,
       documentData,
       parentPointer,
+      draft,
     );
     const deepestPropertyKey = pointer?.split("/").pop();
     const pointerPointsToKnownProperty =
@@ -1129,9 +1131,9 @@ function getEffectiveObjectWithPropertiesSchema(
   schema: JSONSchema7,
   data: unknown,
   pointer: string | undefined,
+  compiledNode?: SchemaNode,
 ): JSONSchema7 | undefined {
-  // TODO (unimportant): [performance] cache compileSchema in case it does some pre-processing? but does not seem to be significant
-  const draft = compileSchema(schema);
+  const draft = compiledNode ?? compileSchema(schema);
   const subSchemaResult =
     pointer != null
       ? draft.getNode(pointer, data ?? undefined)
