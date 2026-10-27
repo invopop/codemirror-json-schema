@@ -1,7 +1,7 @@
 {
   "name": "@invopop/codemirror-json-schema",
   "license": "MIT",
-  "version": "0.9.1",
+  "version": "0.9.4",
   "publishConfig": {
     "access": "public"
   },

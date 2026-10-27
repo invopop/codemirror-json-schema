@@ -11,7 +11,7 @@ import { joinWithOr } from "../utils/formatting";
 import { debug } from "../utils/debug";
 import { JSONMode, Side } from "../types";
 import { el } from "../utils/dom";
-import { getJSONSchema } from "./state";
+import { getJSONSchema, getCompiledSchema } from "./state";
 import { MODES } from "../constants";
 import { renderMarkdown } from "../utils/markdown";
 import { JSONSchema7Type } from "json-schema";
@@ -105,7 +105,7 @@ export class JSONHover {
       // without taking over the existing mode responsibilties?
       return null;
     }
-    this.schema = compileSchema(schema);
+    this.schema = getCompiledSchema(view.state) ?? compileSchema(schema);
 
     const pointer = jsonPointerForPosition(view.state, pos, side, this.mode);
 
