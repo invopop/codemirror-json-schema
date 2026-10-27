@@ -108,5 +108,6 @@ describe("compileSchema", () => {
     // 8× the nodes: linear is ~8×, the path copying this guards against
     // made it ~60×.
     expect(large / small).toBeLessThan(25);
-  });
+    // The documents take a few seconds to validate on CI runners.
+  }, 30_000);
 });
