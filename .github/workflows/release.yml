@@ -1,60 +1,77 @@
 name: Release
 
+# Publishes @invopop/codemirror-json-schema whenever main has a package.json
+# version that isn't on npm yet: bump the version in a pull request and the
+# merge releases it. npm authenticates this workflow through trusted
+# publishing, so no token is stored; see "Releasing" in CONTRIBUTING.md.
+
 on:
   push:
     branches:
       - main
   workflow_dispatch:
 
-concurrency: ${{ github.workflow }}-${{ github.ref }}
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
     permissions:
-      pull-requests: write
-      contents: write
+      contents: write # tag and GitHub release
+      id-token: write # npm trusted publishing and provenance
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4 # version from packageManager
 
       - name: Install Node.js
-        uses: actions/setup-node@v3
-
-      - uses: pnpm/action-setup@v2
-        name: Install pnpm
-        id: pnpm-install
+        uses: actions/setup-node@v4
         with:
-          run_install: false
-          version: 9
+          node-version: 24
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
 
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
+      - name: Check version
+        id: version
         run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - uses: actions/cache@v3
-        name: Setup pnpm cache
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+          name=$(node -p "require('./package.json').name")
+          version=$(node -p "require('./package.json').version")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if [ -n "$(npm view "$name@$version" version 2>/dev/null)" ]; then
+            echo "$name@$version is already published."
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Publishing $name@$version."
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Install dependencies
+        if: steps.version.outputs.publish == 'true'
         run: pnpm install --frozen-lockfile
 
-      - name: Create Release Pull Request or Publish to npm
-        id: changesets
-        uses: changesets/action@v1
+      - name: Test
+        if: steps.version.outputs.publish == 'true'
+        run: pnpm vitest run --dom
 
-        with:
-          # This expects you to have a script called release which does a build for your packages and calls changeset publish
-          publish: pnpm release
-          version: pnpm version-packages
-          createGithubReleases: true
+      - name: Build
+        if: steps.version.outputs.publish == 'true'
+        run: pnpm build
+
+      - name: Publish to npm
+        if: steps.version.outputs.publish == 'true'
+        run: |
+          # Trusted publishing needs npm 11.5.1 or later.
+          npm install --global npm@11
+          npm publish --provenance --access public
+
+      - name: Create GitHub release
+        if: steps.version.outputs.publish == 'true'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+          VERSION: v${{ steps.version.outputs.version }}
+        run: gh release create "$VERSION" --target "$GITHUB_SHA" --title "$VERSION" --generate-notes
