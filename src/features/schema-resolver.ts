@@ -1,6 +1,6 @@
 import { ViewPlugin, type EditorView, type ViewUpdate } from "@codemirror/view";
 import type { JSONSchema7 } from "json-schema";
-import { compileSchema } from "json-schema-library";
+import { compileSchema } from "../utils/compile-schema";
 import { getJSONSchema, updateCompiledSchema } from "./state";
 import { schemaConfigFacet } from "./schema-config";
 import { RefResolver } from "./ref-resolver";

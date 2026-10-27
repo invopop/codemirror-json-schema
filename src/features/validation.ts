@@ -1,10 +1,7 @@
 import type { EditorView, ViewUpdate } from "@codemirror/view";
 import { type Diagnostic } from "@codemirror/lint";
-import {
-  compileSchema,
-  type SchemaNode,
-  type JsonError,
-} from "json-schema-library";
+import { type SchemaNode, type JsonError } from "json-schema-library";
+import { compileSchema } from "../utils/compile-schema";
 
 import {
   getJSONSchema,
